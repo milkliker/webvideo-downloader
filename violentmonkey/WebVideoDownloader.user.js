@@ -13,6 +13,7 @@
 // @match *://v.qq.com/x/page/*
 // @match *://v.qq.com/tv/*
 // @match *://wetv.vip/*
+// @match *://movie.douban.com/*
 // @match *://www.mgtv.com/b/*
 // @require https://unpkg.com/ajax-hook@2.0.0/dist/ajaxhook.min.js
 // @require https://cdn.bootcdn.net/ajax/libs/draggabilly/2.3.0/draggabilly.pkgd.min.js
@@ -29,7 +30,7 @@
 
 var storage = {
   // 通用
-  serverAddr: '127.0.0.1:18888',
+  serverAddr: '172.17.0.92:18888',
   remoteCallType: 'http', // http || websocket
 
   currDomain: '',
@@ -114,6 +115,12 @@ var handler = {
     });
   },
 
+  'douban.com': function() {
+    $.ready(function() {
+      douban_parseResult()
+    });
+  },
+
   'wetv.vip': function() {
     jsonpHook('getvinfo?', wetv_parseResult, {
       onMatch: url => storage.playinfoUrl = url,
@@ -124,6 +131,8 @@ var handler = {
     jsonpHook('getSource?', mgtv_parseResult);
   },
 }
+
+console.log("xxx")
 
 prepare();
 
@@ -361,6 +370,18 @@ function wetv_parseResult(rs) {
       title: document.title,
       content: html,
     });
+  });
+}
+
+// DouBan: 解析视频信息
+function douban_parseResult() {
+  if ($("video").length <= 0) return;
+  url = $("video")[0].currentSrc;
+  $.logEmphasize('VideoSrc', url);
+
+  updateModal({
+    title: document.title,
+    content: `${document.title} ${buildLink(url)}\n`
   });
 }
 
